@@ -13,7 +13,10 @@ FUSO_BRASILIA = timezone(timedelta(hours=FUSO_HORAS))
 
 # Escopo de permissão — o que o app pode fazer na conta do Google
 # "calendar" = leitura e escrita na agenda
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/spreadsheets.readonly"  # leitura do Sheets
+]
 
 
 def autenticar_google():
@@ -42,8 +45,10 @@ def autenticar_google():
         with open(CAMINHO_TOKEN, "w") as token:
             token.write(creds.to_json())
 
-    # Retorna o serviço autenticado do Google Calendar
-    return build("calendar", "v3", credentials=creds)
+    # Retorna o serviço autenticado do Google Calendar e Google Sheets
+    calendar_service = build("calendar", "v3", credentials=creds)
+    sheets_service = build("sheets", "v4", credentials=creds)
+    return calendar_service, sheets_service
 
 
 def buscar_eventos(service, data, calendarioId="primary"):

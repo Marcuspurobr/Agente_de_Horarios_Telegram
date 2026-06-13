@@ -38,10 +38,11 @@ pip install python-telegram-bot python-dotenv google-auth google-auth-oauthlib g
 1. Acesse o [Google Cloud Console](https://console.cloud.google.com)
 2. Crie um novo projeto
 3. Ative a **Google Calendar API**
-4. Vá em **Credenciais** → **Criar credenciais** → **ID do cliente OAuth**
-5. Tipo: **Aplicativo de computador**
-6. Baixe o arquivo e renomeie para `credentials.json`
-7. Coloque na raiz do projeto
+4. Se for usar Google Sheets, ative também a **Google Sheets API**
+5. Vá em **Credenciais** → **Criar credenciais** → **ID do cliente OAuth**
+6. Tipo: **Aplicativo de computador**
+7. Baixe o arquivo e renomeie para `credentials.json`
+8. Coloque na raiz do projeto
 
 ### 5. Configure o arquivo `.env`
 
@@ -49,6 +50,7 @@ Crie um arquivo `.env` na raiz do projeto:
 
 ```
 TOKEN=seu_token_do_telegram_aqui
+SHEETS_ID=id_da_sua_planilha  # só necessário se usar Google Sheets
 ```
 
 ### 6. Configure o `config.py`
@@ -56,24 +58,29 @@ TOKEN=seu_token_do_telegram_aqui
 Edite o arquivo `config.py` com suas configurações:
 
 ```python
-CAMINHO_EXCEL = "membros.xlsx"       # caminho pro arquivo de membros
 CAMINHO_CREDENTIALS = "credentials.json"
 CAMINHO_TOKEN = "token.json"
-FUSO_HORAS = -3                      # UTC-3 para Brasília
+FUSO_HORAS = -3         # UTC-3 para Brasília
+FONTE_MEMBROS = "sheets" # "sheets" ou "excel"
+CAMINHO_EXCEL = "Membros.xlsx"
 ```
 
-### 7. Monte o arquivo de membros
+### 7. Configure a lista de membros
 
-Um arquivo de exemplo `Membros_exemplo.xlsx` já está incluído no repositório com o formato correto.
+O bot suporta duas fontes de dados para os membros — escolha a que preferir no `config.py`:
 
-> ⚠️ **Renomeie `Membros_exemplo.xlsx` para `Membros.xlsx` e substitua pelos dados reais antes de rodar o bot.**
+**Opção 1 — Google Sheets:**
+- Crie uma planilha no Google Sheets com duas colunas: **Nome Completo** e **E-mail**
+- Compartilhe a planilha com sua conta Google
+- Copie o ID da planilha da URL e coloque no `.env` como `SHEETS_ID`
+- No `config.py` defina `FONTE_MEMBROS = "sheets"`
 
-O arquivo deve ter duas colunas:
+**Opção 2 — Excel local:**
+- Renomeie `Membros_exemplo.xlsx` para `Membros.xlsx`
+- Substitua pelos dados reais
+- No `config.py` defina `FONTE_MEMBROS = "excel"`
 
-| Nome Completo | E-mail |
-|---|---|
-| João Silva | joao.silva@empresa.com |
-| Maria Santos | maria.santos@empresa.com |
+> ⚠️ O arquivo `Membros.xlsx` não sobe pro GitHub — ele está no `.gitignore` para proteger os dados.
 
 ### 8. Rode o bot
 
@@ -82,6 +89,8 @@ python main.py
 ```
 
 Na primeira execução vai abrir o navegador para você autenticar com sua conta Google. Após isso o `token.json` é salvo automaticamente.
+
+> ⚠️ Se mudar de `excel` para `sheets` ou vice-versa, delete o `token.json` e autentique novamente.
 
 ---
 
@@ -117,7 +126,7 @@ agente-telegram/
 ├── .env                     # token do Telegram (não sobe pro GitHub)
 ├── .gitignore
 └── tools/
-    ├── google_calendar.py   # integração com Google Calendar
+    ├── google_calendar.py   # integração com Google Calendar e Sheets
     └── excel.py             # busca de membros na planilha
 ```
 

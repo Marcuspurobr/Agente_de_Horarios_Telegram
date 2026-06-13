@@ -25,7 +25,7 @@ async def start(update, context):
     await asyncio.sleep(2)
     await update.message.reply_text("Para marcar uma reuniao chamada 'feedback' de duas horas entre o Nicollas e o Marcus: \n/agendar 12/06/2026 15:00 2 Marcus Nicollas @feedback")
     await asyncio.sleep(2)
-    await update.message.reply_text("Para ver os eventos do dia 12 de junho do marcus: \n/agenda 12/06/2026 Marcus")
+    await update.message.reply_text("Para ver horários livres entre Marcus e Nicollas: \n/disponivel 12/06 Marcus Nicollas")
 
 
 # Implementação para caso o usuário digite /agenda
@@ -37,7 +37,7 @@ async def agenda(update, context):
         data = completar_data(context.args[0])
         nome = context.args[1]
 
-        resultado = buscar_email(nome)
+        resultado = buscar_email(nome, sheets_service)
 
         if resultado is None:
             await update.message.reply_text(f"Nenhum membro encontrado com o nome '{nome}'!")
@@ -48,7 +48,7 @@ async def agenda(update, context):
             return
 
         # Busca os eventos no Google Calendar (está em tools/google_calendar.py)
-        items = buscar_eventos(service, data, buscar_email(nome))
+        items = buscar_eventos(service, data, resultado)
 
         # Formata os eventos em uma mensagem legível
         resposta = formatar_eventos(items, data)
@@ -85,7 +85,7 @@ async def agendar(update, context):
         # busca os emails dos nomes
         emails = []
         for nome in nomes:
-            resultado = buscar_email(nome)
+            resultado = buscar_email(nome, sheets_service)
 
             if resultado is None:
                 await update.message.reply_text(f"Nenhum membro encontrado com o nome '{nome}'!")
@@ -117,7 +117,7 @@ async def disponivel(update, context):
             i += 1
         emails = []
         for nome in nomes:
-            resultado = buscar_email(nome)
+            resultado = buscar_email(nome, sheets_service)
             
             if resultado is None:
                 await update.message.reply_text(f"Nenhum membro encontrado com o nome '{nome}'!")
@@ -155,7 +155,8 @@ load_dotenv()
 
 # Autentica com o Google Calendar
 # Na primeira vez abre o navegador, depois usa o token.json salvo
-service = autenticar_google()
+service, sheets_service = autenticar_google()
+
 
 # Cria o bot com o token do .env
 app = Application.builder().token(os.getenv("TOKEN")).build()
