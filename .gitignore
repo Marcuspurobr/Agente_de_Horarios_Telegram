@@ -3,3 +3,5 @@ token.json
 credentials.json
 .venv
 Membros.xlsx
+__pycache__/
+testando.py
